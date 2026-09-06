@@ -3,6 +3,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define VAPE421_BOOTSTRAP_MAGIC 0x54423456u
 #define VAPE421_BOOTSTRAP_VERSION 2u
 #define VAPE421_BOOTSTRAP_MODE_ONLINE 1u
@@ -37,5 +41,9 @@ void vape_loader_report_progress(int step);
 void vape_loader_report_completed(void);
 void vape_loader_report_failure(const char *message);
 void vape_loader_bootstrap_clear(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

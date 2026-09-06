@@ -140,7 +140,9 @@ extends MappingTaskSet {
             this.D.add(new Badlion189InputQueueMappingTask());
             this.D.add(new Badlion189Render2DMappingTask());
         }
-        if (LunarMappings.isRuntimePresent()) {
+        if (LunarMappings.isRuntimePresent()
+                && LunarStubTransform.legacyHooksAllowedForSpec(
+                        System.getProperty("java.specification.version", ""))) {
             this.D.add(new LunarStubTransform(
                     "com.lunarclient.websocket.badge.v1.BadgeService$Stub",
                     new String[]{"login", "equipBadge"},

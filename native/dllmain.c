@@ -6,6 +6,8 @@
 #include <string.h>
 #include <wchar.h>
 
+int vape421_direct_engine_run(HMODULE module);
+
 static volatile LONG g_loaded_by_jni = 0;
 static wchar_t g_log_file[MAX_PATH];
 static LONG g_log_path_ready = 0;
@@ -943,6 +945,11 @@ static int call_bridge_start(JNIEnv *env, jclass bridge_class) {
     return 1;
 }
 
+static DWORD WINAPI direct_catalog_thread(LPVOID parameter) {
+    vape421_direct_engine_run((HMODULE)parameter);
+    return 0;
+}
+
 static DWORD WINAPI bootstrap_thread(LPVOID parameter) {
     HMODULE jvm_module;
     FARPROC created_vms_address;
@@ -958,6 +965,7 @@ static DWORD WINAPI bootstrap_thread(LPVOID parameter) {
     int registered = 0;
     int completed = 0;
     int attempt;
+    HANDLE catalog_thread = NULL;
     HMODULE worker_module = (HMODULE)parameter;
     DWORD exit_code = 1;
 
@@ -1047,8 +1055,16 @@ static DWORD WINAPI bootstrap_thread(LPVOID parameter) {
     if (!call_bridge_start(env, bridge_class)) {
         goto cleanup;
     }
-    vape_loader_report_completed();
-    vape_log(L"NativeBridge.start completed; injection is active");
+    catalog_thread = CreateThread(NULL, 0, direct_catalog_thread,
+            worker_module, 0, NULL);
+    if (catalog_thread == NULL) {
+        vape_log(L"Failed to start direct Lunar catalog engine: %lu",
+                GetLastError());
+        exit_code = 16;
+        goto cleanup;
+    }
+    CloseHandle(catalog_thread);
+    vape_log(L"NativeBridge.start completed; direct Lunar catalog verification started");
     completed = 1;
     exit_code = 0;
 

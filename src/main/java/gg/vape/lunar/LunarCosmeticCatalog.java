@@ -54,8 +54,15 @@ public final class LunarCosmeticCatalog {
         catch (Throwable failure) {
             Vape.debugLog("LUNAR cosmetic catalog load failed: path="
                     + catalog.getAbsolutePath() + " error=" + failure);
-            return Collections.emptyList();
         }
+        return Collections.emptyList();
+    }
+
+    static synchronized void resetForTests() {
+        cachedPath = null;
+        cachedLength = 0L;
+        cachedLastModified = 0L;
+        cachedIds = null;
     }
 
     static List<Integer> parse(Reader reader) {

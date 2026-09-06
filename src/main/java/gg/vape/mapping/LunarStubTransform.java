@@ -41,12 +41,20 @@ public final class LunarStubTransform extends ClassTransformer {
     }
 
     private static Class<?> resolveSafely(String targetClassName) {
+        if (!legacyHooksAllowedForSpec(
+                System.getProperty("java.specification.version", ""))) {
+            return null;
+        }
         try {
             return LunarMappings.resolveClass(targetClassName);
         }
         catch (Throwable error) {
             return null;
         }
+    }
+
+    static boolean legacyHooksAllowedForSpec(String specification) {
+        return "1.8".equals(specification) || "8".equals(specification);
     }
 
     @Override
